@@ -4,12 +4,16 @@ import { DatasetSourceTypes } from '../../../../types';
 import { FormattedMessage } from 'react-intl';
 import { getDatasetSourceUrl } from '../../../../utils/DatasetUtils';
 import { CopyButton } from '../../../../../shared/building_blocks/CopyButton';
+import { Link } from '../../../../../common/utils/RoutingUtils';
+import { parseJSONSafe } from '../../../../../common/utils/TagUtils';
+import Routes from '../../../../routes';
 
 export interface DatasetLinkProps {
   datasetWithTags: RunDatasetWithTags;
+  experimentId?: string;
 }
 
-export function ExperimentViewDatasetLink({ datasetWithTags }: DatasetLinkProps): JSX.Element | null {
+export function ExperimentViewDatasetLink({ datasetWithTags, experimentId }: DatasetLinkProps): JSX.Element | null {
   const { dataset } = datasetWithTags;
 
   if (dataset.sourceType === DatasetSourceTypes.S3) {
@@ -56,6 +60,28 @@ export function ExperimentViewDatasetLink({ datasetWithTags }: DatasetLinkProps)
         </Button>
       );
     }
+  }
+
+  // Evaluation datasets embed their dataset_id in the JSON-encoded source
+  const parsedSource = parseJSONSafe(dataset.source) as { dataset_id?: string } | undefined;
+  if (parsedSource?.dataset_id && experimentId) {
+    return (
+      <Link
+        componentId="mlflow.experiment_tracking.dataset_drawer.evaluation_dataset_link"
+        to={Routes.getExperimentPageDatasetDetailRoute(experimentId, parsedSource.dataset_id)}
+      >
+        <Button
+          componentId="mlflow.experiment_tracking.dataset_drawer.open_evaluation_dataset"
+          icon={<TableIcon />}
+          type="primary"
+        >
+          <FormattedMessage
+            defaultMessage="Open dataset"
+            description="Text for the button that opens the evaluation dataset in the experiment datasets tab"
+          />
+        </Button>
+      </Link>
+    );
   }
 
   return null;

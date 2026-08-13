@@ -5543,6 +5543,10 @@
     "defaultMessage": "No metrics available",
     "description": "Text shown in a disabled multi-selector when there are no selectable metrics."
   },
+  "M5v7Ht": {
+    "defaultMessage": "Open dataset",
+    "description": "Text for the button that opens the evaluation dataset in the experiment datasets tab"
+  },
   "M65Hoy": {
     "defaultMessage": "Search traces by id, request, or response",
     "description": "Placeholder text for the search input in the trace results table"

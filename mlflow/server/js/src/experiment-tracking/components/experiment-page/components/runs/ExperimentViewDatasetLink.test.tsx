@@ -17,11 +17,11 @@ const createDatasetWithTags = (sourceType: string, source: string): RunDatasetWi
     tags: [],
   }) as any;
 
-const renderComponent = (datasetWithTags: RunDatasetWithTags) => {
+const renderComponent = (datasetWithTags: RunDatasetWithTags, experimentId?: string) => {
   return renderWithIntl(
     <MemoryRouter>
       <DesignSystemProvider>
-        <ExperimentViewDatasetLink datasetWithTags={datasetWithTags} />
+        <ExperimentViewDatasetLink datasetWithTags={datasetWithTags} experimentId={experimentId} />
       </DesignSystemProvider>
     </MemoryRouter>,
   );
@@ -81,6 +81,24 @@ describe('ExperimentViewDatasetLink', () => {
 
   test('renders nothing for unknown source type', () => {
     const dataset = createDatasetWithTags('unknown', JSON.stringify({ url: 'https://example.com' }));
+    const { container } = renderComponent(dataset);
+    expect(container.innerHTML).toBe('');
+    expect(windowOpenSpy).not.toHaveBeenCalled();
+  });
+
+  test('renders a link to the datasets tab when the source contains a dataset_id', () => {
+    const dataset = createDatasetWithTags('mlflow_evaluation_dataset', JSON.stringify({ dataset_id: 'd-123' }));
+    renderComponent(dataset, 'exp-1');
+
+    const href = screen.getByRole('link').getAttribute('href') ?? '';
+    expect(href).toContain('exp-1');
+    expect(href).toContain('datasets/d-123');
+    expect(screen.getByText(/Open dataset/i)).toBeInTheDocument();
+    expect(windowOpenSpy).not.toHaveBeenCalled();
+  });
+
+  test('renders nothing for a dataset_id source when no experiment ID is available', () => {
+    const dataset = createDatasetWithTags('mlflow_evaluation_dataset', JSON.stringify({ dataset_id: 'd-123' }));
     const { container } = renderComponent(dataset);
     expect(container.innerHTML).toBe('');
     expect(windowOpenSpy).not.toHaveBeenCalled();
